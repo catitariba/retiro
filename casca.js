@@ -108,6 +108,7 @@ function poeUrl() {
   history.replaceState(null, "", u);
 }
 function irApp(app) {
+  if (app === "inicio") sairAmpliado();
   if (app !== "inicio" && document.body.classList.contains("passeio-ativo")) mod.passeio?.sair();
   st.app = app;
   document.body.dataset.app = app;
@@ -397,6 +398,39 @@ fetch("data/mobilidade/portas.geojson").then((r) => r.json()).then((g) => {
   if (st.app === "inicio") desenhaEntrada(); else if (st.q[st.app] === "chegar") redesenhaCorpo();
 }).catch(() => { st.portas = []; });
 
+// ---------------------------------------------------------------- vista ampliada (só o 3D)
+// Esconde o quadro, as pílulas e a chamada; o mapa ocupa o ecrã. Se o navegador deixar, pede também ecrã inteiro
+// (o Safari do iPhone não deixa em páginas normais: aí fica só o modo da página). Sai pelo botão, Esc ou "voltar".
+// Passeio e hora continuam a correr. O estado fica só nesta sessão do navegador (sessionStorage).
+let ampliado = false;
+function poeAmpliado(v, { historia = true } = {}) {
+  v = !!v && st.app !== "inicio";
+  if (v === ampliado) return;
+  ampliado = v;
+  document.body.classList.toggle("ampliado", v);
+  $("#ampliar").setAttribute("aria-pressed", String(v));
+  try { sessionStorage.setItem("retiro-ampliado", v ? "1" : "0"); } catch { /* sem armazenamento */ }
+  if (v) {
+    fechaChamada();
+    if (historia) history.pushState({ ampliado: true }, "", location.href);
+    try { document.documentElement.requestFullscreen?.({ navigationUI: "hide" })?.catch?.(() => {}); } catch { /* não deixa */ }
+    $("#ampliarSair").focus({ preventScroll: true });
+  } else {
+    try { if (document.fullscreenElement) document.exitFullscreen?.()?.catch?.(() => {}); } catch { /* já saiu */ }
+    if (historia && history.state?.ampliado) history.back();
+    $("#ampliar").focus({ preventScroll: true });
+  }
+}
+function sairAmpliado() { poeAmpliado(false); }
+$("#ampliar").addEventListener("click", () => poeAmpliado(true));
+$("#ampliarSair").addEventListener("click", () => poeAmpliado(false));
+addEventListener("popstate", () => { if (ampliado) poeAmpliado(false, { historia: false }); });
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && ampliado) poeAmpliado(false); });
+// Esc sai primeiro da vista ampliada (antes do passeio, que também usa Esc para sair)
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && ampliado) { e.stopImmediatePropagation(); e.preventDefault(); poeAmpliado(false); }
+}, true);
+
 export const casca = {
   registar(nome, api) {
     mod[nome] = api;
@@ -409,7 +443,7 @@ export const casca = {
     if (st.app === "inicio") desenhaEntrada(); else redesenhaCorpo();
   },
   estado: () => ({ app: st.app, q: st.q[st.app], vista: st.vista, hora: st.hora, camadas: { ...st.camadas } }),
-  irApp, mostra, irVista,
+  irApp, mostra, irVista, ampliar: poeAmpliado,
 };
 window.casca = casca;
 
@@ -419,6 +453,7 @@ aplicar();
 desenhaDestinos();
 definirHora(Number(params.get("hora")) || 16);
 irApp(st.app);
+try { if (sessionStorage.getItem("retiro-ampliado") === "1") poeAmpliado(true, { historia: false }); } catch { /* sem armazenamento */ }
 requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("inicio")));
 
 // ---------------------------------------------------------------- parallax do herói da entrada (de design/mockups/inicio.html)

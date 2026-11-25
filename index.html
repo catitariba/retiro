@@ -19,6 +19,12 @@
   <p id="atribuicao"><button type="button" class="lig-cred" data-creditos data-i18n="cred.abrir"></button> · <a href="https://www.crtm.es" target="_blank" rel="noopener">Powered by CRTM</a> · <span data-i18n="rod.dados"></span></p>
   <div class="destinos" id="destinos" role="group" data-i18n-attr="aria-label:vista.grupo"></div>
   <aside class="chamada" id="chamada" aria-live="polite"></aside>
+  <!-- vista ampliada: só o modelo 3D, sem o quadro nem os menus (web/casca.js) -->
+  <button type="button" class="ampliar" id="ampliar" aria-pressed="false" data-i18n-attr="title:amp.abrir_t">
+    <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 8V3h5M17 8V3h-5M3 12v5h5M17 12v5h-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span data-i18n="amp.abrir"></span></button>
+  <button type="button" class="ampliar-sair" id="ampliarSair" data-i18n-attr="aria-label:amp.sair;title:amp.sair">
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M8 3v5H3M12 3v5h5M8 17v-5H3M12 17v-5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
 
   <!-- ===== entrada: duas partidas ===== -->
   <section class="quadro entrada" id="qEntrada" aria-labelledby="entTitulo">

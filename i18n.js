@@ -298,6 +298,9 @@ const ES = {
   "pai.ligado_demo": "Demostración · {p} farolas · {s} sensores",
   "pai.demo_repor": "Reponer",
   "cred.abrir": "Créditos",
+  "amp.abrir": "Ampliar",
+  "amp.abrir_t": "Ampliar vista: solo el modelo 3D, sin menús",
+  "amp.sair": "Salir de la vista ampliada",
   "cred.titulo": "Créditos y fuentes",
   "cred.fechar": "Cerrar",
   "cred.corpo": `<p>Gemelo digital del Parque del Retiro hecho con datos abiertos. Cada fuente conserva su licencia.</p>
@@ -607,6 +610,9 @@ const EN = {
   "pai.ligado_demo": "Demo · {p} street lights · {s} sensors",
   "pai.demo_repor": "Reset",
   "cred.abrir": "Credits",
+  "amp.abrir": "Expand",
+  "amp.abrir_t": "Full view: only the 3D model, no menus",
+  "amp.sair": "Exit full view",
   "cred.titulo": "Credits and sources",
   "cred.fechar": "Close",
   "cred.corpo": `<p>Digital twin of the Retiro Park built from open data. Each source keeps its own licence.</p>
