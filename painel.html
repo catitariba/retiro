@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Retiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="painel.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="marca">Retiro</p>
+      <h1 data-i18n="pai.h1"></h1>
+      <p data-i18n-html="pai.sub"></p>
+    </div>
+    <div class="topo-dir">
+      <span id="ligacao" role="status" data-ok="espera" data-i18n="pai.ligar_a"></span>
+      <span class="demo-aviso" data-demo-aviso hidden><span data-i18n="atv.demo"></span> <button type="button" id="demoRepor" data-i18n="pai.demo_repor"></button></span>
+      <a id="abrirGemeo" href="index.html?app=gestion" data-i18n="pai.abrir_gemeo"></a>
+      <div class="idioma" id="idioma"></div>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="t-resumo">
+      <h2 id="t-resumo" data-i18n="pai.resumo"></h2>
+      <dl id="resumo" class="cartoes"></dl>
+    </section>
+
+    <section aria-labelledby="t-sensores">
+      <h2 id="t-sensores" data-i18n="pai.sensores"></h2>
+      <p id="nSens" class="nota"></p>
+      <div id="sensores" class="grupo"></div>
+    </section>
+
+    <section aria-labelledby="t-postes">
+      <div class="cab">
+        <h2 id="t-postes" data-i18n="pai.postes"></h2>
+        <label><span data-i18n="pai.mostrar"></span>
+          <select id="fEstado">
+            <option value="" data-i18n="pai.f_todos"></option>
+            <option value="ligado" data-i18n="pai.f_ligado"></option>
+            <option value="desligado" data-i18n="pai.f_desligado"></option>
+            <option value="avariado" data-i18n="pai.f_avariado"></option>
+          </select>
+        </label>
+        <button type="button" id="todosOn" data-i18n="pai.ligar_parque"></button>
+        <button type="button" id="todosOff" data-i18n="pai.desligar_parque"></button>
+      </div>
+      <p class="nota" data-i18n="pai.nota"></p>
+      <div id="regioes" class="grupo"></div>
+    </section>
+  </main>
+
+  <footer data-i18n="pai.rodape"></footer>
+
+  <script type="module" src="painel.js"></script>
+</body>
+</html>

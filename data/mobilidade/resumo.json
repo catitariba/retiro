@@ -1,0 +1,58 @@
+{
+ "gerado": "2026-11-22T21:09:07",
+ "raio_m": 600.0,
+ "caixa": [
+  440961.0,
+  4472693.8,
+  443192.7,
+  4475358.6
+ ],
+ "visor": [
+  441180.0,
+  4472912.0,
+  442974.0,
+  4475140.0
+ ],
+ "pontos": {
+  "aparcabicis / aparcamento de bicicletas": 55,
+  "autocarro / paragem": 160,
+  "bicimad / estação": 39,
+  "cercanias / acesso": 5,
+  "cercanias / estação": 2,
+  "estacionamento / parque de estacionamento": 16,
+  "interurbano / paragem": 11,
+  "metro / acesso": 41,
+  "metro / estação": 10,
+  "taxi / praça de táxis": 31
+ },
+ "pontos_total": 370,
+ "pontos_fora_do_visor": 93,
+ "linhas": {
+  "autocarro": 91,
+  "cercanias": 7,
+  "ciclovia": 3,
+  "interurbano": 16,
+  "metro": 6
+ },
+ "vertices_tracados_transporte": {
+  "antes": 28689,
+  "depois": 4862
+ },
+ "portas": 21,
+ "portas_no_perimetro": 23,
+ "bytes": {
+  "pontos.geojson": 144023,
+  "linhas.geojson": 135185,
+  "portas.geojson": 12865
+ },
+ "data_dos_dados": {
+  "metro": "20260529",
+  "cercanias": "20260529",
+  "autocarro": "20260529",
+  "interurbano": "20260529",
+  "bicimad": "20261122",
+  "osm": "20261122"
+ },
+ "estimativas": "porta_m = distância em linha reta (não é rota); porta_min = porta_m x 1.3 / 75 m/min, arredondado para cima",
+ "fontes": "CRTM (datos.crtm.es) · BiciMAD GBFS (EMT Madrid) · © OpenStreetMap contributors (ODbL)"
+}

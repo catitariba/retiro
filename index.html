@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Retiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://js.arcgis.com/5.0/esri/themes/light/main.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- a casca desenha-se já; a cena 3D (main.js) carrega por baixo e liga-se à casca quando estiver pronta -->
+  <script type="module" src="casca.js"></script>
+  <script type="module" src="https://js.arcgis.com/5.0/"></script>
+</head>
+<body data-app="inicio" class="inicio">
+  <!-- O "palco": o modelo 3D real, pousado no papel ao lado do quadro -->
+  <div id="view"></div>
+  <p id="atribuicao"><button type="button" class="lig-cred" data-creditos data-i18n="cred.abrir"></button> · <a href="https://www.crtm.es" target="_blank" rel="noopener">Powered by CRTM</a> · <span data-i18n="rod.dados"></span></p>
+  <div class="destinos" id="destinos" role="group" data-i18n-attr="aria-label:vista.grupo"></div>
+  <aside class="chamada" id="chamada" aria-live="polite"></aside>
+
+  <!-- ===== entrada: duas partidas ===== -->
+  <section class="quadro entrada" id="qEntrada" aria-labelledby="entTitulo">
+    <div class="topo">
+      <span class="rot" data-i18n="ent.topo"></span>
+      <div class="topo-dir"><div class="relogio" data-relogio></div><div class="idioma" data-idioma></div></div>
+    </div>
+    <div class="heroi">
+      <figure class="lamina"><img src="ui/natureza/ahuehuete.webp" data-i18n-attr="alt:ent.lamina_alt"><figcaption data-i18n="ent.lamina"></figcaption></figure>
+      <p class="marca-grande">Retiro</p>
+      <h1 id="entTitulo" data-i18n-html="ent.h1"></h1>
+      <p data-i18n="ent.p"></p>
+    </div>
+    <ol class="partidas">
+      <li><a href="?app=visita" data-ir="visita">
+        <span class="k" data-i18n="app.visita"></span>
+        <span class="d" data-i18n="ent.visita_d"></span>
+        <span class="v" id="vVisita"></span>
+        <span class="ir" data-i18n="ent.entrar"></span></a></li>
+      <li><a href="?app=gestion" data-ir="gestion">
+        <span class="k" data-i18n="app.gestion"></span>
+        <span class="d" data-i18n="ent.gestion_d"></span>
+        <span class="v" id="vGestao"></span>
+        <span class="ir"><span data-i18n="ent.entrar"></span><small data-i18n="ent.reservado"></small></span></a></li>
+    </ol>
+    <section class="fauna" aria-labelledby="faunaTit">
+      <span class="rot" id="faunaTit" data-i18n="ent.fauna"></span>
+      <ul>
+        <li><img src="ui/natureza/pato.webp" alt=""><b data-i18n="nat.pato"></b><span data-i18n="ent.pato_d"></span></li>
+        <li><img src="ui/natureza/pavao.webp" alt=""><b data-i18n="nat.pavao"></b><span data-i18n="ent.pavo_d"></span></li>
+        <li><img src="ui/natureza/periquito.webp" alt=""><b data-i18n="nat.periquito"></b><span data-i18n="ent.cotorra_d"></span></li>
+      </ul>
+    </section>
+    <div class="onda" aria-hidden="true"></div>
+    <div class="numeros" id="numeros"></div>
+    <p class="rod"><span data-i18n="ent.rod"></span> <button type="button" class="lig-cred" data-creditos data-i18n="cred.abrir"></button></p>
+  </section>
+
+  <!-- herói em papel recortado (parallax) no lugar do mapa, só na entrada -->
+  <div class="heroi-papel" aria-hidden="false">
+    <section class="retiro-hero" data-parallax role="img" data-i18n-attr="aria-label:ent.heroi_alt">
+      <img src="ui/parallax/sky.webp" data-depth="0.12" alt="">
+      <img src="ui/parallax/birds_1.webp" data-depth="0.12" data-anim="ave" data-per="7" data-fase="0.10" data-c="823,200" alt="">
+      <img src="ui/parallax/birds_2.webp" data-depth="0.12" data-anim="ave" data-per="9" data-fase="0.55" data-c="1062,223" alt="">
+      <img src="ui/parallax/birds_3.webp" data-depth="0.12" data-anim="ave" data-per="8" data-fase="0.78" data-c="916,298" alt="">
+      <img src="ui/parallax/mid.webp" data-depth="0.40" alt="">
+      <img src="ui/parallax/water.webp" data-depth="0.55" alt="">
+      <img src="ui/parallax/ducks_1.webp" data-depth="0.55" data-anim="pato" data-per="6" data-fase="0.20" data-c="957,851" alt="">
+      <img src="ui/parallax/ducks_2.webp" data-depth="0.55" data-anim="pato" data-per="8" data-fase="0.55" data-c="507,870" alt="">
+      <img src="ui/parallax/ducks_3.webp" data-depth="0.55" data-anim="pato" data-per="7" data-fase="0.82" data-c="770,882" alt="">
+      <img src="ui/parallax/fg.webp" data-depth="1" alt="">
+      <img src="ui/parallax/frame.webp" data-depth="0" alt="">
+    </section>
+    <p class="heroi-legenda"><span class="rot" data-i18n="ent.vista01"></span><span data-i18n="ent.heroi_leg"></span></p>
+  </div>
+
+  <!-- ===== apps Visita e Gestión: o mesmo quadro, conteúdo por app ===== -->
+  <section class="quadro app" id="qApp" aria-labelledby="marcaApp">
+    <header class="cab">
+      <a class="marca" href="./" id="marcaApp" data-i18n-attr="title:app.volver"><b>Retiro</b><small><span data-i18n="marca.sub"></span> · <i id="marcaNome"></i></small></a>
+      <div class="cab-dir"><div class="relogio" data-relogio></div><div class="idioma" data-idioma></div></div>
+      <div class="hora-ctl">
+        <label class="rot" for="hora" id="horaRot"></label>
+        <input type="range" id="hora" min="5" max="24" step="0.25" value="16" data-i18n-attr="aria-label:hora.cursor">
+        <button class="agora" type="button" id="agora" data-i18n="hora.agora"></button>
+      </div>
+    </header>
+    <div class="placar" id="placar"></div>
+    <div class="onda" aria-hidden="true"></div>
+    <nav class="modos" role="tablist" id="modos"></nav>
+    <div class="corpo" id="corpo"></div>
+    <!-- separador Control da Gestión: o painel do gestor num iframe (fora de #corpo para não recarregar ao mudar de separador) -->
+    <div class="controlo" id="controlo" hidden>
+      <div class="controlo-cab"><span class="rot" data-i18n="ges.ct_nota"></span><a href="painel.html" target="_blank" rel="noopener" id="controloAparte" data-i18n="ges.ct_aparte"></a></div>
+      <iframe id="controloQuadro" data-i18n-attr="title:ges.ct_titulo"></iframe>
+    </div>
+    <footer class="estados">
+      <span id="estado" role="status" data-i18n="est.carregar"></span>
+      <span id="ativosEstado" role="status"></span>
+      <span id="mobEstado" role="status" hidden></span>
+      <span class="demo-aviso" data-demo-aviso data-i18n="atv.demo" hidden></span>
+    </footer>
+  </section>
+
+  <!-- créditos e licenças (abre-se com os botões data-creditos; textos em i18n.js, cred.*) -->
+  <dialog class="creditos" id="creditos" aria-labelledby="credTit">
+    <div class="cred-cab"><h2 id="credTit" data-i18n="cred.titulo"></h2>
+      <button type="button" class="fechar" data-fechar data-i18n-attr="aria-label:cred.fechar">×</button></div>
+    <div class="cred-corpo" data-i18n-html="cred.corpo"></div>
+  </dialog>
+
+  <script type="module" src="creditos.js"></script>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

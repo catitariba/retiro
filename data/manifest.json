@@ -1,0 +1,589 @@
+{
+ "versao": 1795377561,
+ "epsg": 25830,
+ "origin": [
+  442000.0,
+  4474000.0,
+  0.0
+ ],
+ "layers": {
+  "terreno_piloto": {
+   "file": "terreno_piloto.glb",
+   "bytes": 12173008,
+   "objects": 1
+  },
+  "terreno_cristal": {
+   "file": "terreno_cristal.glb",
+   "bytes": 4857992,
+   "objects": 1
+  },
+  "terreno_rosaleda": {
+   "file": "terreno_rosaleda.glb",
+   "bytes": 6780096,
+   "objects": 1
+  },
+  "terreno_parterre": {
+   "file": "terreno_parterre.glb",
+   "bytes": 2509352,
+   "objects": 1
+  },
+  "terreno_estatuas": {
+   "file": "terreno_estatuas.glb",
+   "bytes": 1319224,
+   "objects": 1
+  },
+  "terreno_vacas": {
+   "file": "terreno_vacas.glb",
+   "bytes": 1227316,
+   "objects": 1
+  },
+  "terreno_cecilio": {
+   "file": "terreno_cecilio.glb",
+   "bytes": 3488940,
+   "objects": 1
+  },
+  "terreno_parque": {
+   "file": "terreno_parque.glb",
+   "bytes": 19341964,
+   "objects": 1
+  },
+  "edificios": {
+   "file": "edificios.glb",
+   "bytes": 1648212,
+   "objects": 124
+  },
+  "estatisticas": {
+   "Agua": {
+    "objetos": 48,
+    "triangulos": 3270
+   },
+   "Arvores": {
+    "objetos": 4498,
+    "triangulos": 6848940
+   },
+   "Caminhos": {
+    "objetos": 0,
+    "triangulos": 0
+   },
+   "Edificios": {
+    "objetos": 124,
+    "triangulos": 16695
+   },
+   "Entorno": {
+    "objetos": 294,
+    "triangulos": 71528
+   },
+   "Mobiliario": {
+    "objetos": 98,
+    "triangulos": 45120
+   },
+   "Monumentos": {
+    "objetos": 42,
+    "triangulos": 98100
+   },
+   "Perimetro": {
+    "objetos": 2,
+    "triangulos": 21872
+   },
+   "Terreno": {
+    "objetos": 8,
+    "triangulos": 4981900
+   },
+   "Vegetacao_Rasteira": {
+    "objetos": 75,
+    "triangulos": 63038
+   }
+  },
+  "entorno": {
+   "file": "entorno.glb",
+   "bytes": 3305464,
+   "objects": 291
+  },
+  "monumentos": {
+   "file": "monumentos.glb",
+   "bytes": 4749428,
+   "objects": 42
+  },
+  "mobiliario": {
+   "file": "mobiliario.glb",
+   "bytes": 2024712,
+   "objects": 98
+  },
+  "bordas": {
+   "file": "bordas.glb",
+   "bytes": 157756,
+   "objects": 24
+  },
+  "sebes": {
+   "file": "sebes.glb",
+   "bytes": 3285696,
+   "objects": 75
+  },
+  "perimetro": {
+   "file": "perimetro.glb",
+   "bytes": 1931428,
+   "objects": 2,
+   "alpha": [
+    "MASK"
+   ]
+  },
+  "arvores": {
+   "modelos": {
+    "ABIES_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 363676,
+     "largura": 5.29
+    },
+    "ABIES_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 94376,
+     "largura": 6.74
+    },
+    "ACER_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 221136,
+     "largura": 10.26
+    },
+    "ACER_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 64184,
+     "largura": 13.38
+    },
+    "AESCULUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 289936,
+     "largura": 9.05
+    },
+    "AESCULUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 87596,
+     "largura": 11.21
+    },
+    "CEDRUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 380984,
+     "largura": 7.19
+    },
+    "CEDRUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 98216,
+     "largura": 8.78
+    },
+    "CELTIS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 241064,
+     "largura": 9.84
+    },
+    "CELTIS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 67548,
+     "largura": 14.19
+    },
+    "CERCIS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 702,
+     "bytes": 209028,
+     "largura": 11.39
+    },
+    "CERCIS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 104,
+     "bytes": 63364,
+     "largura": 14.05
+    },
+    "CUPRESSUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 602,
+     "bytes": 387068,
+     "largura": 2.58
+    },
+    "CUPRESSUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 114,
+     "bytes": 107288,
+     "largura": 4.1
+    },
+    "FRAXINUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 397108,
+     "largura": 8.04
+    },
+    "FRAXINUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 101384,
+     "largura": 10.78
+    },
+    "GEN_CONIFERA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 385008,
+     "largura": 5.79
+    },
+    "GEN_CONIFERA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 103640,
+     "largura": 7.78
+    },
+    "GEN_FOLHOSA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 222008,
+     "largura": 9.52
+    },
+    "GEN_FOLHOSA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 66260,
+     "largura": 11.8
+    },
+    "GEN_PEQUENA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 702,
+     "bytes": 204896,
+     "largura": 11.05
+    },
+    "GEN_PEQUENA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 104,
+     "bytes": 62392,
+     "largura": 13.22
+    },
+    "GLEDITSIA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 732,
+     "bytes": 410968,
+     "largura": 9.59
+    },
+    "GLEDITSIA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 110,
+     "bytes": 111412,
+     "largura": 11.78
+    },
+    "LIGUSTRUM_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 702,
+     "bytes": 226460,
+     "largura": 10.42
+    },
+    "LIGUSTRUM_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 104,
+     "bytes": 65304,
+     "largura": 12.96
+    },
+    "MAGNOLIA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 226488,
+     "largura": 7.55
+    },
+    "MAGNOLIA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 62348,
+     "largura": 9.51
+    },
+    "PHOENIX_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 206,
+     "bytes": 103992,
+     "largura": 8.05
+    },
+    "PHOENIX_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 80,
+     "bytes": 45352,
+     "largura": 7.05
+    },
+    "PICEA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 342680,
+     "largura": 5.17
+    },
+    "PICEA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 87980,
+     "largura": 6.66
+    },
+    "PINUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 702,
+     "bytes": 352424,
+     "largura": 10.25
+    },
+    "PINUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 114,
+     "bytes": 91164,
+     "largura": 12.72
+    },
+    "PLATANUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 228964,
+     "largura": 8.14
+    },
+    "PLATANUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 67732,
+     "largura": 9.87
+    },
+    "POPULUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 261192,
+     "largura": 5.98
+    },
+    "POPULUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 74368,
+     "largura": 7.15
+    },
+    "PRUNUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 702,
+     "bytes": 221040,
+     "largura": 10.74
+    },
+    "PRUNUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 104,
+     "bytes": 68652,
+     "largura": 13.27
+    },
+    "QUERCUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 216208,
+     "largura": 10.93
+    },
+    "QUERCUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 64556,
+     "largura": 13.33
+    },
+    "ROBINIA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 732,
+     "bytes": 399060,
+     "largura": 7.99
+    },
+    "ROBINIA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 110,
+     "bytes": 107836,
+     "largura": 10.7
+    },
+    "STYPHNOLOBIUM_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 394092,
+     "largura": 10.07
+    },
+    "STYPHNOLOBIUM_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 104812,
+     "largura": 11.7
+    },
+    "TAXUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 349232,
+     "largura": 7.21
+    },
+    "TAXUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 90340,
+     "largura": 8.96
+    },
+    "THUJA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 602,
+     "bytes": 423728,
+     "largura": 3.69
+    },
+    "THUJA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 114,
+     "bytes": 117588,
+     "largura": 4.69
+    },
+    "TILIA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 239648,
+     "largura": 8.48
+    },
+    "TILIA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 72660,
+     "largura": 10.33
+    },
+    "ULMUS_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 882,
+     "bytes": 230364,
+     "largura": 7.85
+    },
+    "ULMUS_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 132,
+     "bytes": 69884,
+     "largura": 9.73
+    },
+    "WASHINGTONIA_1": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 206,
+     "bytes": 100152,
+     "largura": 5.26
+    },
+    "WASHINGTONIA_2": {
+     "alpha": [
+      "MASK"
+     ],
+     "tris": 80,
+     "bytes": 44984,
+     "largura": 5.4
+    }
+   },
+   "arvores": 16476
+  },
+  "vetores": {
+   "agua": 24,
+   "arte": 72
+  }
+ },
+ "atribuicao": "Ayuntamiento de Madrid (CC BY 4.0) · © OpenStreetMap contributors (ODbL)"
+}
