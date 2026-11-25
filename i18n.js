@@ -311,7 +311,7 @@ const ES = {
 <dt>Consorcio Regional de Transportes de Madrid · <a href="https://www.crtm.es/licencia-de-uso" target="_blank" rel="noopener">licencia de uso del CRTM</a></dt>
 <dd>Metro, Cercanías, autobuses EMT e interurbanos (datos de 29/05/2026). <a href="https://www.crtm.es" target="_blank" rel="noopener">Powered by CRTM</a>.</dd>
 <dt>BiciMAD · EMT de Madrid</dt>
-<dd>Disponibilidad en tiempo real (GBFS), leída solo al abrir una estación. El catálogo de la EMT la publica como CC BY-NC 2.0 (uso no comercial).</dd>
+<dd>Disponibilidad en tiempo real (GBFS), leída solo al abrir una estación, según las <a href="https://mobilitylabs.emtmadrid.es/sip/terms-of-use" target="_blank" rel="noopener">condiciones de uso de la EMT</a>. <a href="https://www.emtmadrid.es" target="_blank" rel="noopener">Powered by EMT de Madrid</a>.</dd>
 <dt>Software</dt>
 <dd>ArcGIS Maps SDK for JavaScript 5.0 (Esri). Modelo montado en Blender y ArcGIS Pro. Tipografía Hanken Grotesk (SIL Open Font License).</dd>
 </dl>
@@ -620,7 +620,7 @@ const EN = {
 <dt>Consorcio Regional de Transportes de Madrid · <a href="https://www.crtm.es/licencia-de-uso" target="_blank" rel="noopener">CRTM licence</a></dt>
 <dd>Metro, Cercanías, EMT and interurban buses (data of 29/05/2026). <a href="https://www.crtm.es" target="_blank" rel="noopener">Powered by CRTM</a>.</dd>
 <dt>BiciMAD · EMT de Madrid</dt>
-<dd>Live availability (GBFS), read only when a station is opened. The EMT catalogue lists it as CC BY-NC 2.0 (non-commercial).</dd>
+<dd>Live availability (GBFS), read only when a station is opened, under the <a href="https://mobilitylabs.emtmadrid.es/sip/terms-of-use" target="_blank" rel="noopener">EMT terms of use</a>. <a href="https://www.emtmadrid.es" target="_blank" rel="noopener">Powered by EMT de Madrid</a>.</dd>
 <dt>Software</dt>
 <dd>ArcGIS Maps SDK for JavaScript 5.0 (Esri). Model assembled in Blender and ArcGIS Pro. Hanken Grotesk typeface (SIL Open Font License).</dd>
 </dl>
