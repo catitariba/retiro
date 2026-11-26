@@ -1,8 +1,11 @@
 // Casca "papel": entrada (Visita / Gestión), quadro de cada app, destinos sobre o mapa, chamada, hora do dia.
-// Desenha-se logo, antes da cena 3D. O gêmeo (main.js) liga-se com casca.registar("gemeo", {...}) e os módulos
+// Desenha-se logo. A entrada mostra o plano 2D (web/plano2d.js) e NÃO carrega o SDK: o SDK e a cena 3D (main.js) só se
+// carregam quando a pessoa entra numa app em 3D (garantir3D). Na Visita pode escolher-se Plano (2D, leve) ou 3D; no celular
+// a Visita abre no plano. O gêmeo (main.js) liga-se com casca.registar("gemeo", {...}) e os módulos
 // opcionais com casca.registar("ativos"|"mobilidade"|"passeio", api). A casca nunca fala com as camadas de ativos:
 // lê o que o gêmeo já leu (evento "retiro:ativos"); quem escreve nelas é o painel (separador Control).
 import { t, dado, fmt, aplicar, poeTexto, seletorIdioma, lang } from "./i18n.js";
+import { carregarPlano, montarPlano } from "./plano2d.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -28,6 +31,12 @@ const VISTA_DA_REGIAO = { "Estanque": "estanque", "Palacio de Cristal": "cristal
   "Parterre": "parterre", "Paseo de las Estatuas": "estatuas", "Casa de Vacas": "vacas", "Cecilio Rodríguez": "cecilio" };
 const MODOS_MOB = [["autocarro", "#2f7fd6"], ["metro", "#e0292f"], ["cercanias", "#c2185b"], ["bicimad", "#19b5a5"], ["outros", "#f2f2f2"]];
 const ZONAS_MODELADAS = 8;
+// vista de câmara -> o que mostrar no plano 2D (zona do plano, ou ponto em coordenadas locais = real − (442000, 4474000))
+const VISTA_NO_PLANO = { estanque: "piloto", monumento: "piloto", passeio: "piloto", cristal: "cristal", velazquez: "velazquez",
+  rosaleda: "rosaleda", parterre: "parterre", estatuas: "estatuas", vacas: "vacas", cecilio: "cecilio", angel: [64, -410], independencia: [-389, 579] };
+const ZONA_PARA_VISTA = { piloto: "estanque", cristal: "cristal", velazquez: "velazquez", rosaleda: "rosaleda", parterre: "parterre",
+  estatuas: "estatuas", vacas: "vacas", cecilio: "cecilio" };
+const CELULAR = matchMedia("(max-width: 700px)");
 // limiares de aviso desta interface (não do serviço)
 const LIM = { ruido: 70, solo: 18 };
 
@@ -41,6 +50,10 @@ const st = {
   mobModos: Object.fromEntries(MODOS_MOB.map(([m]) => [m, true])),
   ativos: null,               // { ok, lums, sens } da última leitura do gêmeo
   portas: null,               // features de data/mobilidade/portas.geojson
+  // motor do mapa nas apps: "2d" (plano SVG) ou "3d" (SDK). A Gestión é sempre 3D (o placar vem do gêmeo).
+  // sem ?motor=, decide-se ao entrar na app (largura do ecrã nesse momento): celular -> plano, resto -> 3D
+  motor: ["2d", "3d"].includes(params.get("motor")) ? params.get("motor") : null,
+  resumo: null,               // contagens de data/parque.json (a entrada não carrega as camadas)
 };
 if (params.get("q") && st.app !== "inicio") st.q[st.app] = params.get("q");
 
@@ -105,6 +118,7 @@ function poeUrl() {
   if (st.camadas.mob) u.searchParams.set("mobilidade", "on"); else u.searchParams.delete("mobilidade");
   if (st.app === "inicio") { u.searchParams.delete("app"); u.searchParams.delete("q"); }
   else { u.searchParams.set("app", st.app); u.searchParams.set("q", st.q[st.app]); }
+  if (st.app === "visita" && st.motor) u.searchParams.set("motor", st.motor); else u.searchParams.delete("motor");
   history.replaceState(null, "", u);
 }
 function irApp(app) {
@@ -113,7 +127,7 @@ function irApp(app) {
   st.app = app;
   document.body.dataset.app = app;
   fechaChamada();
-  if (app !== "inicio") { desenhaApp(); }
+  if (app !== "inicio") { desenhaApp(); aplicaMotor(); }
   else desenhaEntrada();
   rapidoAtivos();
   poeUrl();
@@ -163,6 +177,7 @@ function ligaCorpo(semAnim) {
   });
   c.querySelectorAll(".interruptor").forEach((b) => b.addEventListener("click", () => alternaCamada(b.dataset.c)));
   c.querySelectorAll(".chips button").forEach((b) => b.addEventListener("click", () => alternaModo(b.dataset.m)));
+  c.querySelectorAll("[data-abrir3d]").forEach((b) => b.addEventListener("click", () => poeMotor("3d")));
 }
 
 // ---------------------------------------------------------------- quadros da Visita
@@ -175,7 +190,7 @@ function quadroChegar(semAnim) {
   const P = st.portas;
   const ent = semAnim ? "" : " entra";
   const mob = `<table class="q"><tbody><tr class="ok sem-num"><td class="nome longo">${esc(t("vis.transporte"))}<span class="sub">${esc(t("vis.transporte_s"))}</span></td>
-    <td>${interruptor("mob", st.camadas.mob, t("vis.transporte"), !mod.mobilidade)}</td></tr></tbody></table>${st.camadas.mob ? chipsMob() : ""}`;
+    <td>${interruptor("mob", st.camadas.mob, t("vis.transporte"), mod.gemeo && !mod.mobilidade)}</td></tr></tbody></table>${st.camadas.mob ? chipsMob() : ""}`;
   if (!P) return mob + secTit(esc(t("vis.ch_tit"))) + `<p class="rod">${esc(t("vis.ch_cargando"))}</p>`;
   const linhas = P.map((f, i) => {
     const a = f.properties, [e] = (a.metro || "").split(" · "), est = e.replace(/\s*\(.*\)/, ""), lin = ((e.match(/\((.*)\)/) || [, ""])[1]).split(",")[0];
@@ -191,6 +206,8 @@ function quadroChegar(semAnim) {
 }
 function quadroPasseios(semAnim) {
   const P = mod.passeio?.percursos;
+  if (!P && st.motor === "2d") return secTit(esc(t("vis.pa_tit"))) + `<p class="rod">${esc(t("vis.pa_3d"))}</p>` +
+    `<p class="rod" style="padding-top:0"><button type="button" class="btn forte" data-abrir3d>${esc(t("vis.pa_abrir3d"))}</button></p>`;
   if (!P) return secTit(esc(t("vis.pa_tit"))) + `<p class="rod">${esc(t(st.passeioFalhou ? "vis.pa_falta" : "vis.pa_cargando"))}</p>`;
   const ent = semAnim ? "" : " entra";
   return secTit(esc(t("vis.pa_tit")), esc(t("vis.pa_tit2"))) +
@@ -270,8 +287,9 @@ const QUADROS = { chegar: quadroChegar, passeios: quadroPasseios, zonas: quadroZ
 function escolhe(tr) {
   const d = tr.dataset;
   if (d.passeio) {
+    if (st.motor === "2d") poeMotor("3d");   // o passeio acontece no modelo 3D
     const p = mod.passeio;
-    if (!p) return;
+    if (!p) { poeMotor("3d"); quando("passeio").then((pp) => { if (pp) { pp.escolher(d.passeio); pp.entrar(); } }); return; }
     fechaChamada();
     p.escolher(d.passeio);
     p.entrar();
@@ -281,14 +299,23 @@ function escolhe(tr) {
   if (d.z) irVista(d.z);
   else if (d.porta != null) {
     const f = st.portas[Number(d.porta)];
-    mod.gemeo?.irPonto(f.geometry.coordinates[0], f.geometry.coordinates[1]);
+    if (st.motor === "2d") plano?.irPonto(f.geometry.coordinates[0] - 442000, f.geometry.coordinates[1] - 4474000, 320);
+    else mod.gemeo?.irPonto(f.geometry.coordinates[0], f.geometry.coordinates[1]);
     marcaDestino(null);
   } else if (d.regiao) abreChamada(d.regiao);
 }
 function irVista(nome) {
-  if (!mod.gemeo) return;
-  st.vista = nome;
+  if (st.motor === "2d" && st.app !== "gestion") {
+    if (nome === "mobilidade") { st.vista = nome; poeMotor("3d"); if (!st.camadas.mob) alternaCamada("mob"); return; }
+    st.vista = nome;
+    marcaDestino(nome);
+    const alvo = VISTA_NO_PLANO[nome];
+    if (!alvo) plano?.inteiro(); else if (Array.isArray(alvo)) plano?.irPonto(alvo[0], alvo[1], 320); else plano?.irZona(alvo);
+    return;
+  }
+  st.vista = nome;                       // se o 3D ainda está a carregar, a câmara vai para aqui quando o gêmeo se registar
   marcaDestino(nome);
+  if (!mod.gemeo) return;
   mod.gemeo.irVista(nome);
   if (nome === "mobilidade" && mod.mobilidade && !st.camadas.mob) alternaCamada("mob");
 }
@@ -301,7 +328,7 @@ function alternaCamada(id) {
   else if (id === "arv" && g) g.camadas.arvores.visible = v;
   else if (id === "arte" && g) g.camadas.arte.visible = v;
   else if (id === "sombras") g?.sombras(v);
-  else if (id === "mob") { mod.mobilidade?.ligar(v); poeUrl(); }
+  else if (id === "mob") { mod.mobilidade?.ligar(v); poeUrl(); if (v && st.motor === "2d") poeMotor("3d"); }
   redesenhaCorpo();
 }
 function alternaModo(m) {
@@ -313,7 +340,7 @@ function alternaModo(m) {
 // ---------------------------------------------------------------- destinos (pílulas sobre o mapa)
 function desenhaDestinos() {
   const el = $("#destinos");
-  el.innerHTML = VISTAS.filter((v) => v !== "mobilidade" || mod.mobilidade).map((v) => `<button type="button" data-vista="${v}" aria-pressed="${v === st.vista}">${esc(t("vista." + v))}</button>`).join("");
+  el.innerHTML = VISTAS.filter((v) => v !== "mobilidade" || mod.mobilidade || !mod.gemeo).map((v) => `<button type="button" data-vista="${v}" aria-pressed="${v === st.vista}">${esc(t("vista." + v))}</button>`).join("");
   el.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => irVista(b.dataset.vista)));
 }
 function marcaDestino(id) {
@@ -367,10 +394,13 @@ function rapidoAtivos() { mod.ativos?.rapido(st.app === "gestion" && st.q.gestio
 
 // ---------------------------------------------------------------- entrada
 function desenhaEntrada() {
-  const rs = regioes(), T = totais(rs), nP = st.portas?.length, nPas = mod.passeio?.percursos?.length;
+  // contagens fixas do resumo de data/parque.json; quando o gêmeo já está carregado (voltar à entrada), as avarias ao vivo
+  const R = st.resumo, rs = regioes(), T = totais(rs), nP = R?.portas, nPas = R?.paseos, nLum = rs.length ? T.n : R?.luminarias;
   $("#vVisita").textContent = nP && nPas ? t("ent.v_visita", { portas: nP, paseos: nPas, zonas: ZONAS_MODELADAS }) : "";
-  $("#vGestao").textContent = rs.length ? t(T.avariadas === 1 ? "ent.v_gestion1" : "ent.v_gestion", { av: T.avariadas, avisos: T.avisos, lig: T.ligadas, n: T.n }) : "";
-  $("#numeros").innerHTML = [["ent.n_zonas", ZONAS_MODELADAS], ["ent.n_luces", rs.length ? T.n : null], ["ent.n_puertas", nP], ["ent.n_paseos", nPas]]
+  $("#vGestao").textContent = rs.length ? t(T.avariadas === 1 ? "ent.v_gestion1" : "ent.v_gestion", { av: T.avariadas, avisos: T.avisos, lig: T.ligadas, n: T.n })
+    : R ? t("ent.v_gestion_est", { n: R.luminarias, s: R.sensores }) : "";
+  $("#plLegenda").textContent = R ? t("pl.leg", { n: R.arvores }) : "";
+  $("#numeros").innerHTML = [["ent.n_zonas", ZONAS_MODELADAS], ["ent.n_luces", nLum], ["ent.n_puertas", nP], ["ent.n_paseos", nPas]]
     .map(([k, v]) => `<div><span class="rot">${esc(t(k))}</span><b>${v == null ? "—" : fmt.num(v)}</b></div>`).join("");
   document.title = t("doc.titulo");
 }
@@ -431,11 +461,96 @@ addEventListener("keydown", (e) => {
   if (e.key === "Escape" && ampliado) { e.stopImmediatePropagation(); e.preventDefault(); poeAmpliado(false); }
 }, true);
 
+// ---------------------------------------------------------------- 3D a pedido
+// O SDK (~1 MB) e a cena 3D só se carregam aqui: ao entrar na Gestión, ou na Visita em 3D, ou quando uma ação precisa
+// do 3D (passeio, transporte no mapa). Depois de carregado fica (voltar ao plano só o esconde).
+const espera = {};                       // módulo -> funções à espera que ele se registe
+const quando = (nome) => (mod[nome] !== null && mod[nome] !== undefined) ? Promise.resolve(mod[nome]) : new Promise((ok) => (espera[nome] ??= []).push(ok));
+let a3D = null;
+function garantir3D() {
+  if (a3D) return a3D;
+  poeTexto($("#estado"), "est.carregar");
+  a3D = (async () => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet"; css.href = "https://js.arcgis.com/5.0/esri/themes/light/main.css";
+    document.head.appendChild(css);
+    const sdk = document.createElement("script");
+    sdk.type = "module"; sdk.src = "https://js.arcgis.com/5.0/";
+    document.head.appendChild(sdk);
+    await new Promise((ok, erro) => { sdk.onerror = () => erro(new Error("SDK")); const v = () => (window.$arcgis ? ok() : setTimeout(v, 30)); v(); });
+    await import("./main.js");
+  })();
+  a3D.catch((e) => { console.error("3D", e); poeTexto($("#estado"), "est.falhou", { lista: "SDK" }); a3D = null; });
+  return a3D;
+}
+// ---------------------------------------------------------------- plano 2D (entrada e Visita em 2D)
+let plano = null, aPlano = null;
+function garantirPlano() {
+  if (aPlano) return aPlano;
+  const t0 = performance.now();
+  aPlano = carregarPlano().then((d) => {
+    st.resumo = d.resumo;
+    plano = montarPlano($("#plano"), d, {
+      aoEscolher: () => $("#plDica").classList.add("fora"),
+      aoAcao: (tipo, s) => {
+        if (tipo === "porta") {          // como chegar: Visita › Llegar, com a porta escolhida no plano
+          if (st.app !== "visita") irApp("visita");
+          mostra("chegar");
+          plano.irPonto(s.x, s.y, 320);
+        } else if (tipo === "zona") {    // ver em 3D: Visita em 3D, na vista da zona
+          st.vista = ZONA_PARA_VISTA[s.z] ?? "estanque";
+          if (st.app !== "visita") irApp("visita");
+          poeMotor("3d");
+          irVista(st.vista);
+        }
+      },
+    });
+    plano.camada("arte", st.app !== "inicio"); plano.camada("zonas", st.app !== "inicio");
+    window.plano2d = plano;
+    if (st.app === "inicio") desenhaEntrada();
+    requestAnimationFrame(() => requestAnimationFrame(() => { window.entrada_pronta_ms = Math.round(performance.now()); window.plano_ms = Math.round(performance.now() - t0); }));
+    return plano;
+  }).catch((e) => { console.error("plano 2D", e); aPlano = null; });
+  return aPlano;
+}
+document.querySelectorAll("[data-pl-camada]").forEach((b) => b.addEventListener("click", () => {
+  const on = b.getAttribute("aria-pressed") !== "true";
+  b.setAttribute("aria-pressed", String(on));
+  plano?.camada(b.dataset.plCamada, on);
+}));
+document.querySelectorAll("[data-pl-zoom]").forEach((b) => b.addEventListener("click", () => {
+  if (b.dataset.plZoom === "todo") plano?.inteiro(); else plano?.zoom(b.dataset.plZoom === "mais" ? 2 : 0.5);
+}));
+// ---------------------------------------------------------------- Plano / 3D
+function aplicaMotor() {
+  if (!st.motor && st.app !== "inicio") st.motor = CELULAR.matches ? "2d" : "3d";
+  const m = st.app === "gestion" ? "3d" : st.motor;
+  document.body.classList.toggle("motor-2d", st.app !== "inicio" && m === "2d");
+  document.querySelectorAll("#motor [data-motor]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.motor === m)));
+  if (st.app === "inicio") { garantirPlano(); return; }
+  if (m === "3d") garantir3D();
+  else {
+    garantirPlano().then(() => { plano?.camada("arte", true); plano?.camada("zonas", true); irVista(st.vista); });
+    if (!a3D) poeTexto($("#estado"), "est.plano");
+  }
+}
+function poeMotor(m) {
+  if (m === st.motor && document.body.classList.contains("motor-2d") === (m === "2d")) return;
+  st.motor = m;
+  poeUrl();
+  aplicaMotor();
+  if (m === "3d" && mod.gemeo) mod.gemeo.irVista(st.vista === "mobilidade" ? "mobilidade" : st.vista);
+  if (st.q[st.app] === "passeios" || st.q[st.app] === "chegar") redesenhaCorpo();
+}
+document.querySelectorAll("#motor [data-motor]").forEach((b) => b.addEventListener("click", () => poeMotor(b.dataset.motor)));
+
 export const casca = {
   registar(nome, api) {
     mod[nome] = api;
     if (nome === "passeio" && !api) st.passeioFalhou = true;
-    if (nome === "gemeo") { api.definirHora(st.hora); marcaDestino(st.vista); }
+    if (nome === "gemeo") { api.definirHora(st.hora); marcaDestino(st.vista); if (st.vista !== "estanque" && st.vista !== "mobilidade") api.irVista(st.vista); }
+    for (const f of (espera[nome] ?? [])) f(api);
+    espera[nome] = [];
     if (nome === "ativos" && api) {
       api.visivelLuz(st.camadas.ilum); api.visivelSensores(st.camadas.sens); rapidoAtivos();
     }
@@ -443,7 +558,7 @@ export const casca = {
     if (st.app === "inicio") desenhaEntrada(); else redesenhaCorpo();
   },
   estado: () => ({ app: st.app, q: st.q[st.app], vista: st.vista, hora: st.hora, camadas: { ...st.camadas } }),
-  irApp, mostra, irVista, ampliar: poeAmpliado,
+  irApp, mostra, irVista, ampliar: poeAmpliado, motor: poeMotor,
 };
 window.casca = casca;
 
@@ -452,57 +567,7 @@ document.querySelectorAll("[data-idioma]").forEach((el) => seletorIdioma(el));
 aplicar();
 desenhaDestinos();
 definirHora(Number(params.get("hora")) || 16);
+garantirPlano();
 irApp(st.app);
 try { if (sessionStorage.getItem("retiro-ampliado") === "1") poeAmpliado(true, { historia: false }); } catch { /* sem armazenamento */ }
 requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("inicio")));
-
-// ---------------------------------------------------------------- parallax do herói da entrada (de design/mockups/inicio.html)
-// Rato e scroll com suavização; nos ecrãs táteis uma deriva lenta. Respeita "reduzir movimento". Só corre à vista.
-(function () {
-  const CW = 1528, CH = 1139, AX = 40, AY = 24, AS = 32, EASE = 0.06;
-  const IDLE = matchMedia("(hover: none)").matches;
-  const hero = document.querySelector("[data-parallax]");
-  if (!hero) return;
-  const layers = [...hero.querySelectorAll("img")].map((el) => {
-    const L = { el, d: parseFloat(el.dataset.depth) || 0, anim: el.dataset.anim };
-    if (L.anim) {
-      L.per = +el.dataset.per; L.fase = +el.dataset.fase;
-      const [ox, oy] = el.dataset.c.split(",").map(Number);
-      el.style.transformOrigin = `${(ox / CW) * 100}% ${(oy / CH) * 100}%`;
-    }
-    return L;
-  });
-  const mov = (L, tt) => {
-    const w = (2 * Math.PI) / L.per, f = L.fase * 6.28;
-    if (L.anim === "pato") return { x: Math.sin(tt * w + f) * 4, y: Math.sin(tt * 2.1 + f) * 1.5, s: 1 };
-    return { x: Math.sin(tt * w + f) * 6, y: Math.sin(tt * 0.8 + f) * 4, s: 1 - 0.3 * Math.abs(Math.sin(tt * Math.PI * (1.3 + L.fase))) };
-  };
-  let tx = 0, ty = 0, cx = 0, cy = 0, scroll = 0, cs = 0, visible = true, raf = 0;
-  const t0 = performance.now();
-  Promise.all(layers.map(({ el }) => el.decode?.().catch(() => {}))).then(() => hero.classList.add("is-ready"));
-  setTimeout(() => hero.classList.add("is-ready"), 1500);
-  addEventListener("pointermove", (e) => { if (e.pointerType !== "mouse" || st.app !== "inicio") return; tx = (e.clientX / innerWidth) * 2 - 1; ty = (e.clientY / innerHeight) * 2 - 1; kick(); }, { passive: true });
-  const lerScroll = () => { const r = hero.getBoundingClientRect(); scroll = Math.max(-1, Math.min(1, (innerHeight / 2 - (r.top + r.height / 2)) / innerHeight)); kick(); };
-  document.querySelector(".quadro.entrada")?.addEventListener("scroll", lerScroll, { passive: true });
-  new IntersectionObserver(([en]) => { visible = en.isIntersecting; kick(); }).observe(hero);
-  function kick() { if (!raf && visible && !reduz) raf = requestAnimationFrame(tick); }
-  function tick(now) {
-    raf = 0;
-    if (st.app !== "inicio") return;
-    const tt = (now - t0) / 1000;
-    if (IDLE) { tx = Math.sin(tt * 0.35) * 0.35; ty = Math.sin(tt * 0.7) * 0.2; }
-    cx += (tx - cx) * EASE; cy += (ty - cy) * EASE; cs += (scroll - cs) * 0.12;
-    const k = hero.clientWidth / CW;
-    for (const L of layers) {
-      if (!L.d) continue;
-      let x = -cx * AX * L.d * k, y = (-cy * AY - cs * AS) * L.d * k, s = 1;
-      if (L.anim) { const m = mov(L, tt); x += m.x * k; y += m.y * k; s = m.s; }
-      L.el.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0)` + (s !== 1 ? ` scaleY(${s.toFixed(3)})` : "");
-    }
-    kick();
-  }
-  // ao voltar à entrada recomeça
-  addEventListener("popstate", kick);
-  new MutationObserver(kick).observe(document.body, { attributes: true, attributeFilter: ["data-app"] });
-  kick();
-})();

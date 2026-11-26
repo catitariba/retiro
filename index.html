@@ -7,11 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://js.arcgis.com/5.0/esri/themes/light/main.css">
   <link rel="stylesheet" href="style.css">
-  <!-- a casca desenha-se já; a cena 3D (main.js) carrega por baixo e liga-se à casca quando estiver pronta -->
+  <!-- só a casca e o plano 2D no arranque. O SDK e a cena 3D (main.js) carregam quando se escolhe uma app em 3D (web/casca.js) -->
   <script type="module" src="casca.js"></script>
-  <script type="module" src="https://js.arcgis.com/5.0/"></script>
 </head>
 <body data-app="inicio" class="inicio">
   <!-- O "palco": o modelo 3D real, pousado no papel ao lado do quadro -->
@@ -19,10 +17,14 @@
   <p id="atribuicao"><button type="button" class="lig-cred" data-creditos data-i18n="cred.abrir"></button> · <a href="https://www.crtm.es" target="_blank" rel="noopener">Powered by CRTM</a> · <span data-i18n="rod.dados"></span></p>
   <div class="destinos" id="destinos" role="group" data-i18n-attr="aria-label:vista.grupo"></div>
   <aside class="chamada" id="chamada" aria-live="polite"></aside>
-  <!-- vista ampliada: só o modelo 3D, sem o quadro nem os menus (web/casca.js) -->
+  <!-- sobre o mapa, em cima à direita: plano 2D ou modelo 3D, e vista ampliada (só o mapa, sem o quadro nem os menus) -->
+  <div class="mapa-acoes">
+  <div class="motor" id="motor" role="group" data-i18n-attr="aria-label:motor.grupo">
+    <button type="button" data-motor="2d" aria-pressed="false" data-i18n="motor.2d"></button><button type="button" data-motor="3d" aria-pressed="true" data-i18n="motor.3d"></button></div>
   <button type="button" class="ampliar" id="ampliar" aria-pressed="false" data-i18n-attr="title:amp.abrir_t">
     <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 8V3h5M17 8V3h-5M3 12v5h5M17 12v5h-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     <span data-i18n="amp.abrir"></span></button>
+  </div>
   <button type="button" class="ampliar-sair" id="ampliarSair" data-i18n-attr="aria-label:amp.sair;title:amp.sair">
     <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M8 3v5H3M12 3v5h5M8 17v-5H3M12 17v-5h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
 
@@ -63,22 +65,24 @@
     <p class="rod"><span data-i18n="ent.rod"></span> <button type="button" class="lig-cred" data-creditos data-i18n="cred.abrir"></button></p>
   </section>
 
-  <!-- herói em papel recortado (parallax) no lugar do mapa, só na entrada -->
-  <div class="heroi-papel" aria-hidden="false">
-    <section class="retiro-hero" data-parallax role="img" data-i18n-attr="aria-label:ent.heroi_alt">
-      <img src="ui/parallax/sky.webp" data-depth="0.12" alt="">
-      <img src="ui/parallax/birds_1.webp" data-depth="0.12" data-anim="ave" data-per="7" data-fase="0.10" data-c="823,200" alt="">
-      <img src="ui/parallax/birds_2.webp" data-depth="0.12" data-anim="ave" data-per="9" data-fase="0.55" data-c="1062,223" alt="">
-      <img src="ui/parallax/birds_3.webp" data-depth="0.12" data-anim="ave" data-per="8" data-fase="0.78" data-c="916,298" alt="">
-      <img src="ui/parallax/mid.webp" data-depth="0.40" alt="">
-      <img src="ui/parallax/water.webp" data-depth="0.55" alt="">
-      <img src="ui/parallax/ducks_1.webp" data-depth="0.55" data-anim="pato" data-per="6" data-fase="0.20" data-c="957,851" alt="">
-      <img src="ui/parallax/ducks_2.webp" data-depth="0.55" data-anim="pato" data-per="8" data-fase="0.55" data-c="507,870" alt="">
-      <img src="ui/parallax/ducks_3.webp" data-depth="0.55" data-anim="pato" data-per="7" data-fase="0.82" data-c="770,882" alt="">
-      <img src="ui/parallax/fg.webp" data-depth="1" alt="">
-      <img src="ui/parallax/frame.webp" data-depth="0" alt="">
-    </section>
-    <p class="heroi-legenda"><span class="rot" data-i18n="ent.vista01"></span><span data-i18n="ent.heroi_leg"></span></p>
+  <!-- plano 2D ilustrado (web/plano2d.js): na entrada no lugar do herói; na Visita em 2D no lugar do modelo 3D -->
+  <div class="plano-palco" id="planoPalco">
+    <div class="plano-caixa" id="plano">
+      <div class="pl-grao"></div>
+      <div class="pl-ctl camadas">
+        <button type="button" class="pl-pilula" data-pl-camada="portas" aria-pressed="true"><i style="background:var(--pinho)"></i><span data-i18n="pl.puertas"></span></button>
+        <button type="button" class="pl-pilula" data-pl-camada="zonas" aria-pressed="false"><i style="border:1.5px dashed var(--pinho)"></i><span data-i18n="pl.zonas"></span></button>
+        <button type="button" class="pl-pilula" data-pl-camada="arte" aria-pressed="false"><i style="background:var(--calendula)"></i><span data-i18n="pl.arte"></span></button>
+      </div>
+      <div class="pl-ctl zoom">
+        <button type="button" class="pl-pilula pl-redondo" data-pl-zoom="mais" data-i18n-attr="aria-label:pl.mas;title:pl.mas">+</button>
+        <button type="button" class="pl-pilula pl-redondo" data-pl-zoom="menos" data-i18n-attr="aria-label:pl.menos;title:pl.menos">−</button>
+        <button type="button" class="pl-pilula pl-redondo" data-pl-zoom="todo" data-i18n-attr="aria-label:pl.inicio;title:pl.inicio">⌂</button>
+      </div>
+      <p class="pl-dica" id="plDica" data-i18n="pl.toca"></p>
+      <p class="pl-cred" data-i18n="pl.fuente"></p>
+    </div>
+    <p class="pl-legenda"><span class="rot" data-i18n="pl.plano"></span><span id="plLegenda"></span></p>
   </div>
 
   <!-- ===== apps Visita e Gestión: o mesmo quadro, conteúdo por app ===== -->
@@ -117,6 +121,5 @@
   </dialog>
 
   <script type="module" src="creditos.js"></script>
-  <script type="module" src="main.js"></script>
 </body>
 </html>

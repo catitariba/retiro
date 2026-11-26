@@ -301,42 +301,116 @@ body.passeio-ativo .destinos, body.passeio-ativo .chamada, body.passeio-ativo #a
 .numeros .rot { text-transform: none; font-size: 12px; letter-spacing: 0; }
 .entrada .rod { padding: 10px 26px 22px; }
 
-/* herói em papel recortado no lugar do mapa (só na entrada) */
-.heroi-papel { display: none; }
-body[data-app="inicio"] .heroi-papel { position: fixed; z-index: 3; inset: 0 0 0 var(--larg); padding: 16px 16px 16px 0; background: var(--fundo);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
-.retiro-hero { position: relative; width: min(100%, calc((100vh - 90px) * 1528 / 1139)); aspect-ratio: 1528 / 1139; overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 97%, transparent 100%), linear-gradient(180deg, transparent 0, #000 3%, #000 97%, transparent 100%);
-  -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(90deg, transparent 0, #000 3%, #000 97%, transparent 100%), linear-gradient(180deg, transparent 0, #000 3%, #000 97%, transparent 100%);
-  mask-composite: intersect; opacity: 0; transition: opacity 0.8s ease; }
-.retiro-hero.is-ready { opacity: 1; }
-.retiro-hero img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; user-select: none; pointer-events: none; will-change: transform; }
-.retiro-hero img[data-depth="1"] { filter: drop-shadow(0 3px 4px rgba(40, 50, 30, 0.18)); }
-.heroi-legenda { margin: 0; width: min(100%, calc((100vh - 90px) * 1528 / 1139)); padding: 0 4%; display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
-.heroi-legenda .rot { color: var(--tinta); white-space: nowrap; }
-
+/* ---------------- plano 2D ilustrado (web/plano2d.js) ----------------
+   Na entrada ocupa o lugar do herói em papel recortado; na Visita em 2D, o lugar do modelo 3D (#view).
+   Paleta tirada do herói (relva, copas, água, caminhos creme), de design/mockups/mapa2d/comum.css. */
+:root {
+  --m-base: #e4e3bf; --m-relva: #bfd38f; --m-campo: #cddb9f; --m-infantil: #f6d98c;
+  --m-copa: #7ea552; --m-copa-esc: #3f6b33; --m-sebe: #3f6b33;
+  --m-agua: #a5d9ea; --m-agua-borda: #5aaed0; --m-caminho: #fbf6e8; --m-caminho-borda: #d9cba6; --m-edif: #fffaf0;
+}
+.plano-palco { display: none; position: fixed; z-index: 3; flex-direction: column; gap: 8px; }
+body[data-app="inicio"] .plano-palco { display: flex; inset: 16px 16px 16px var(--larg); }
+body.motor-2d:not([data-app="inicio"]) .plano-palco { display: flex; top: 16px; right: 16px; bottom: 16px; left: var(--larg); z-index: 2; }
+body.motor-2d:not([data-app="inicio"]) #view { visibility: hidden; }
+.plano-caixa { position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: 40px; background: var(--fundo); touch-action: none;
+  user-select: none; -webkit-user-select: none; cursor: grab; }
+.plano-caixa:active { cursor: grabbing; }
+.pl-grao { position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: 0.55; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 0 0.3 0 0 0 0.11 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.pl-ctl { position: absolute; z-index: 4; display: flex; gap: 6px; }
+.pl-ctl.camadas { top: 18px; left: 18px; right: 18px; overflow-x: auto; scrollbar-width: none; }
+.pl-ctl.camadas::-webkit-scrollbar { display: none; }
+.pl-ctl.zoom { right: 18px; bottom: 18px; flex-direction: column; }
+.pl-pilula { flex: none; height: 36px; padding: 0 15px; border: 0; border-radius: 99px; background: var(--neve); color: var(--carvao); font: 400 14px/1 var(--f);
+  display: inline-flex; align-items: center; gap: 7px; transition: background-color 140ms ease, color 140ms ease, transform 140ms var(--ease); }
+.pl-pilula:active { transform: scale(0.97); }
+.pl-pilula[aria-pressed="true"] { background: var(--carvao); color: #fff; }
+.pl-pilula i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.pl-redondo { width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 20px; font-weight: 300; }
+.pl-cred { position: absolute; z-index: 4; left: 22px; bottom: 18px; margin: 0; max-width: calc(100% - 100px); font-size: 10.5px; color: var(--carvao);
+  background: rgba(255, 255, 255, 0.75); padding: 3px 9px; border-radius: 99px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-dica { position: absolute; z-index: 4; left: 50%; bottom: 46px; transform: translateX(-50%); margin: 0; padding: 9px 16px; border-radius: 99px;
+  background: var(--carvao); color: #fff; font-size: 13px; white-space: nowrap; pointer-events: none; transition: opacity 300ms var(--ease); }
+.pl-dica.fora { opacity: 0; }
+.pl-legenda { margin: 0; padding: 0 4%; display: flex; gap: 12px; align-items: baseline; font-size: 13px; }
+.pl-legenda .rot { color: var(--tinta); white-space: nowrap; }
+/* na app: as pílulas das vistas ficam em cima; o plano mostra portas, zonas 3D e arte, sem os seus botões de camadas nem a legenda */
+body:not([data-app="inicio"]) .pl-ctl.camadas, body:not([data-app="inicio"]) .pl-legenda, body:not([data-app="inicio"]) .pl-cred,
+body:not([data-app="inicio"]) .pl-dica { display: none; }
+/* ficha: cartão branco pousado no papel (como o popup do mapa 3D) */
+.pl-ficha { position: absolute; z-index: 5; left: 18px; bottom: 50px; width: min(320px, calc(100% - 92px)); padding: 16px 18px 14px; border-radius: 20px;
+  background: var(--neve); opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 180ms var(--ease), transform 220ms var(--ease); }
+.pl-ficha.aberta { opacity: 1; transform: none; pointer-events: auto; }
+.pl-ficha h2 { margin: 4px 28px 8px 0; font: 300 22px/1.1 var(--f); letter-spacing: -0.03em; color: var(--pinho); }
+.pl-ficha dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13.5px; }
+.pl-ficha dt { font: 400 10.5px/1.5 var(--f); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta2); }
+.pl-ficha dd { margin: 0; }
+.pl-ficha .x { position: absolute; top: 10px; right: 10px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--placa2); font-size: 16px; }
+.pl-ficha .pl-acao { margin-top: 12px; height: 40px; padding: 0 18px; border: 0; border-radius: 20px; background: var(--carvao); color: #fff; font: 400 14px/1 var(--f); }
+body:not([data-app="inicio"]) .pl-ficha { bottom: 18px; }
+/* SVG: rótulos com tamanho constante no ecrã (--u = unidades do plano por píxel) */
+svg.plano { display: block; width: 100%; height: 100%; transform-origin: 0 0; will-change: transform; } /* camada própria: o gesto só move a imagem já desenhada */
+svg.plano text { font-family: var(--f); paint-order: stroke; stroke: var(--fundo); stroke-linejoin: round; pointer-events: none; }
+svg.plano .r-zona { font-size: calc(var(--u) * 17px); font-weight: 300; letter-spacing: -0.02em; fill: var(--pinho); stroke-width: calc(var(--u) * 4px); }
+svg.plano .r-porta { font-size: calc(var(--u) * 12px); font-weight: 400; fill: var(--pinho); stroke-width: calc(var(--u) * 3.5px); }
+svg.plano .r-edif { font-size: calc(var(--u) * 11px); font-weight: 400; fill: var(--carvao); stroke-width: calc(var(--u) * 3px); }
+svg.plano .r-paseo { font-size: calc(var(--u) * 10px); font-weight: 400; fill: rgba(35, 33, 44, 0.66); letter-spacing: 0.08em; text-transform: uppercase; stroke-width: calc(var(--u) * 3px); }
+svg.plano .so-perto, svg.plano .so-mto-perto { display: none; }
+svg.plano.perto .so-perto { display: inline; }
+svg.plano.mto-perto .so-mto-perto, svg.plano.mto-perto .so-perto { display: inline; }
+svg.plano .alvo { cursor: pointer; }
+svg.plano .porta circle { transition: r 160ms var(--ease); }
+svg.plano .porta:hover circle.p, svg.plano .porta.sel circle.p { fill: var(--calendula); stroke: var(--carvao); }
+svg.plano .arte circle:hover, svg.plano .arte circle.sel { fill: var(--pinho); }
+svg.plano .zona3d { fill: none; stroke: var(--pinho); stroke-dasharray: 2 5; stroke-linecap: round; opacity: 0.8; }
+svg.plano .zona3d.sel { stroke: var(--calendula); opacity: 1; }
+svg.plano.pequeno .r-zona { font-size: calc(var(--u) * 11.5px); stroke-width: calc(var(--u) * 3px); }
+svg.plano.pequeno:not(.perto) .r-porta { display: none; }
+svg.plano.sem-arte .arte, svg.plano.sem-portas .portas, svg.plano.sem-arvores .arvores, svg.plano.sem-zonas .zonas3d { display: none; }
 
 /* ---------------- celular: mapa em cima, quadro em baixo ---------------- */
 /* ---------------- vista ampliada: só o modelo 3D ---------------- */
-.ampliar, .ampliar-sair { position: fixed; z-index: 7; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0;
+.mapa-acoes { position: fixed; z-index: 7; top: 78px; right: 30px; display: flex; gap: 6px; align-items: center; transition: opacity 200ms var(--ease); }
+body[data-app="inicio"] .mapa-acoes { display: none; }
+body.ampliado .mapa-acoes { opacity: 0; pointer-events: none; }
+.motor { display: inline-flex; padding: 3px; border-radius: 99px; background: var(--neve); }
+.motor button { height: 32px; min-width: 44px; padding: 0 12px; border: 0; border-radius: 99px; background: transparent; color: var(--carvao); font: 400 14px/1 var(--f); }
+.motor button[aria-pressed="true"] { background: var(--carvao); color: #fff; }
+body[data-app="gestion"] .motor { display: none; }
+.ampliar { position: static; }
+.ampliar, .ampliar-sair { z-index: 7; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0;
   background: var(--neve); color: var(--carvao); -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   transition: transform 140ms var(--ease), opacity 200ms var(--ease); }
 .ampliar:active, .ampliar-sair:active { transform: scale(0.96); }
-.ampliar { top: 78px; right: 30px; height: 38px; padding: 0 16px 0 13px; border-radius: 99px; font: 400 14px/1 var(--f); }
-.ampliar-sair { top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); width: 44px; height: 44px; border-radius: 50%;
+.ampliar { height: 38px; padding: 0 16px 0 13px; border-radius: 99px; font: 400 14px/1 var(--f); }
+.ampliar-sair { position: fixed; top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); width: 44px; height: 44px; border-radius: 50%;
   opacity: 0; pointer-events: none; }
 body[data-app="inicio"] .ampliar, body[data-app="inicio"] .ampliar-sair { display: none; }
 body.ampliado .ampliar { opacity: 0; pointer-events: none; }
 body.ampliado .ampliar-sair { opacity: 1; pointer-events: auto; }
-html body.ampliado #view { top: 0; right: 0; bottom: 0; left: 0; border-radius: 0; height: 100dvh; }
+html body.ampliado #view, html body.ampliado.motor-2d .plano-palco { top: 0; right: 0; bottom: 0; left: 0; border-radius: 0; height: 100dvh; }
+html body.ampliado .plano-caixa { border-radius: 0; }
 body.ampliado .quadro, body.ampliado .destinos, body.ampliado .chamada, body.ampliado #passeio { opacity: 0; pointer-events: none; visibility: hidden; }
 body.ampliado #atribuicao { left: max(12px, env(safe-area-inset-left)); bottom: max(10px, env(safe-area-inset-bottom)); right: auto; max-width: calc(100vw - 140px); }
 #view { transition: left 320ms var(--drawer), top 320ms var(--drawer), right 320ms var(--drawer), bottom 320ms var(--drawer), border-radius 320ms var(--drawer); }
 .quadro, .destinos { transition: transform 320ms var(--drawer), opacity 200ms var(--ease); }
 
 @media (max-width: 700px) {
-  .ampliar { top: 62px; right: 20px; height: 34px; padding: 0 13px 0 11px; font-size: 13px; }
+  .mapa-acoes { top: 62px; right: 20px; }
+  .ampliar { height: 34px; padding: 0 13px 0 11px; font-size: 13px; }
+  .motor button { height: 28px; min-width: 40px; padding: 0 10px; font-size: 13px; }
+  /* plano: na entrada em cima, como o herói; na Visita em 2D no lugar do mapa */
+  body[data-app="inicio"] .plano-palco { inset: 8px 8px auto 8px; height: calc(36vh - 12px); }
+  body.motor-2d:not([data-app="inicio"]) .plano-palco { top: 10px; left: 10px; right: 10px; bottom: calc(58vh + 4px); }
+  .plano-caixa { border-radius: 28px; }
+  .pl-legenda, .pl-ctl.zoom { display: none; }
+  .pl-ctl.camadas { top: 12px; left: 12px; right: 12px; }
+  .pl-pilula { height: 32px; font-size: 13px; padding: 0 12px; }
+  .pl-cred { left: 14px; bottom: 10px; font-size: 9px; }
+  .pl-ficha { left: 10px; right: 10px; bottom: 10px; width: auto; padding: 12px 14px; }
+  .pl-ficha h2 { font-size: 18px; }
+  .pl-dica { bottom: 34px; font-size: 12px; }
   :root { --larg: 100vw; --row-h: 48px; }
   /* popup no mapa pequeno do celular: compacto, sem a barra de ações */
   .esri-popup .esri-features__heading, .esri-popup .esri-widget__heading { font-size: 17px !important; }
@@ -395,9 +469,6 @@ body.ampliado #atribuicao { left: max(12px, env(safe-area-inset-left)); bottom: 
   #pasInfo { margin-left: 6px; }
   /* entrada: herói em cima, quadro em baixo */
   .quadro.entrada { top: 36vh; }
-  body[data-app="inicio"] .heroi-papel { inset: 0 0 auto 0; height: 36vh; padding: 6px 10px 0; }
-  .retiro-hero { width: min(100%, calc((36vh - 10px) * 1528 / 1139)); }
-  .heroi-legenda { display: none; }
   .entrada .topo { padding: 12px 16px 0; }
   .heroi { padding: 18px 16px 22px; }
   .heroi p.marca-grande { font-size: 68px; }
